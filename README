@@ -9,11 +9,8 @@ mod_markdown is Markdown filter module for Apache HTTPD Server.
 
   http://www.pell.portland.or.us/~orc/Code/discount/
 
-## Build
-    % ./autogen.sh
-    % ./configure --with-apache=<APACHE_DIR> --with-discount=<DISCOUNT_DIR>
-    % make
-    % make install
+## Build and install with APache eXtenSion tool
+    % apxs -i -A -l markdown -c mod_markdown.c
 
 ## Configration
 in httpd.conf:
@@ -22,5 +19,10 @@ in httpd.conf:
         AddHandler markdown .md
 
         # If you want to use stylesheet.
-        MarkdownCss style.css
+        MarkdownCSS style.css
+
+        # You can also provide an optional argument to 
+        # specify media type.
+        MarkdownCSS print.css print
+
     </Location>
