@@ -48,7 +48,8 @@
 module AP_MODULE_DECLARE_DATA markdown_module;
 
 typedef struct {
-    const void *data;
+    const void *path;
+    const void *media;
     struct list_t *next;
 } list_t;
 
@@ -87,10 +88,19 @@ void markdown_output(MMIOT *doc, request_rec *r)
                  " content=\"text/css\" />\n", r);
 		css = conf->css;
 		do{
-            ap_rprintf(r,
-                       "<link rel=\"stylesheet\" href=\"%s\""
-                       " type=\"text/css\" />\n",
-                       (char *)css->data);
+            if (css->media == NULL) {
+                ap_rprintf(r,
+                           "<link rel=\"stylesheet\" href=\"%s\""
+                           " type=\"text/css\" />\n",
+                           (char *)css->path);
+            }
+            else {
+                ap_rprintf(r,
+                           "<link rel=\"stylesheet\" href=\"%s\""
+                           " type=\"text/css\" media=\"%s\" />\n",
+                           (char *)css->path,
+                           (char *)css->media);
+            }
             css = (list_t *)css->next;
 		}while(css);
     }
@@ -186,11 +196,18 @@ static void *markdown_config(apr_pool_t * p, char *dummy)
 }
 
 static const char *set_markdown_css(cmd_parms * cmd, void *conf,
-                                    const char *arg)
+                                    const char *path,
+                                    const char *media)
 {
     markdown_conf *c = (markdown_conf *) conf;
     list_t *item = (list_t *)malloc(sizeof(list_t));
-    item->data = arg;
+    item->path = path;
+    if (media == NULL) {
+        item->media = NULL;
+    }
+    else {
+        item->media = media;
+    }
     item->next = NULL;
 
     list_t *tail;
@@ -221,7 +238,7 @@ static const char *set_markdown_footer(cmd_parms * cmd, void *conf,
 }
 
 static const command_rec markdown_cmds[] = {
-    AP_INIT_TAKE1("MarkdownCSS", set_markdown_css, NULL, OR_ALL,
+    AP_INIT_TAKE12("MarkdownCSS", set_markdown_css, NULL, OR_ALL,
                   "set CSS"),
     AP_INIT_TAKE1("MarkdownHeaderHtml", set_markdown_footer, NULL, OR_ALL,
                   "set Header HTML"),
