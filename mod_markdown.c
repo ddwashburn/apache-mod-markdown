@@ -64,6 +64,8 @@ typedef struct {
 void markdown_output(MMIOT *doc, request_rec *r)
 {
     char *title;
+    char *author;
+    char *date;
     int ret;
     int size;
     char *p;
@@ -80,6 +82,20 @@ void markdown_output(MMIOT *doc, request_rec *r)
              r);
     ap_rputs("<html xmlns=\"http://www.w3.org/1999/xhtml\">\n", r);
     ap_rputs("<head>\n", r);
+
+    author = mdk_doc_author(doc);
+    if (author) {
+        ap_rprintf(r,
+                   "<meta name=\"author\" content=\"%s\" />",
+                   (char *) author);
+    }
+
+    date = mdk_doc_date(doc);
+    if (date) {
+        ap_rprintf(r,
+                   "<meta name=\"date\" content=\"%s\" />",
+                   (char *) date);
+    }
 
     if (conf->css) {
         ap_rputs("<meta http-equiv=\"Content-Type\""
@@ -110,9 +126,6 @@ void markdown_output(MMIOT *doc, request_rec *r)
     }
     ap_rputs("</head>\n", r);
     ap_rputs("<body>\n", r);
-    if (title) {
-        ap_rprintf(r, "<h1 class=\"title\">%s</h1>\n", title);
-    }
     if ((size = mkd_document(doc, &p)) != EOF) {
         ap_rwrite(p, size, r);
     }
