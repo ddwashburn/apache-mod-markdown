@@ -83,20 +83,6 @@ void markdown_output(MMIOT *doc, request_rec *r)
     ap_rputs("<html xmlns=\"http://www.w3.org/1999/xhtml\">\n", r);
     ap_rputs("<head>\n", r);
 
-    author = mdk_doc_author(doc);
-    if (author) {
-        ap_rprintf(r,
-                   "<meta name=\"author\" content=\"%s\" />",
-                   (char *) author);
-    }
-
-    date = mdk_doc_date(doc);
-    if (date) {
-        ap_rprintf(r,
-                   "<meta name=\"date\" content=\"%s\" />",
-                   (char *) date);
-    }
-
     if (conf->css) {
         ap_rputs("<meta http-equiv=\"Content-Type\""
                  " content=\"text/html; charset=UTF-8\" />\n", r);
