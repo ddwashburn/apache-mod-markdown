@@ -10,7 +10,7 @@ mod_markdown is Markdown filter module for Apache HTTPD Server.
   http://www.pell.portland.or.us/~orc/Code/discount/
 
 ## Build and install with APache eXtenSion tool
-    % apxs -i -A -l markdown -c mod_markdown.c
+    $ apxs -i -A -l markdown -c mod_markdown.c
 
 ## Configration
 in httpd.conf:
