@@ -26,5 +26,9 @@ LoadModule markdown_module modules/mod_markdown.so
     # specify media type.
     MarkdownCSS print.css print
 
+    # If you want to include a Google Analytics
+    # site id.
+    MarkdownGAID UA-12345678-0
+
 </Location>
 ```

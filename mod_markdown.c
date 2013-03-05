@@ -57,6 +57,7 @@ typedef struct {
     list_t *css;
     const char *header;
     const char *footer;
+    const char *ga_id;
 } markdown_conf;
 
 #define P(s) ap_rputs(s, r)
@@ -124,6 +125,28 @@ void markdown_output(MMIOT *doc, request_rec *r)
     if (title) {
         ap_rprintf(r, "<title>%s</title>\n", title);
     }
+
+    if (conf->ga_id) {
+        ap_rputs("<script type=\"text/javascript\">\n", r);
+        ap_rputs("//<!CDATA[\n", r);
+        ap_rputs("var _gaq = _gaq || [];\n", r);
+        ap_rprintf(r,
+                   "_gaq.push(['_setAccount', '%s'])\n",
+                   (char *)conf->ga_id);
+        ap_rputs("_gaq.push(['_trackPageview']);\n", r);
+        ap_rputs("(function() {\n", r);
+        ap_rputs("var ga = document.createElement('script');"
+                 " ga.type = 'text/javascript'; ga.async = true;\n", r);
+        ap_rputs("ga.src = ('https:' == document.location.protocol ?"
+                 " 'https://ssl' : 'http://www') +"
+                 " '.google-analytics.com/ga.js';\n", r);
+        ap_rputs("var s = document.getElementsByTagName('script')[0];"
+                 " s.parentNode.insertBefore(ga, s);\n", r);
+        ap_rputs("})();\n", r);
+        ap_rputs("//]]>\n", r);
+        ap_rputs("</script>\n", r);
+    }
+
     ap_rputs("</head>\n", r);
     ap_rputs("<body>\n", r);
     if ((size = mkd_document(doc, &p)) != EOF) {
@@ -250,6 +273,14 @@ static const char *set_markdown_footer(cmd_parms * cmd, void *conf,
     return NULL;
 }
 
+static const char *set_markdown_ga_id(cmd_parms * cmd, void *conf,
+									   const char *arg)
+{
+    markdown_conf *c = (markdown_conf *) conf;
+    c->ga_id = arg;
+    return NULL;
+}
+
 static const command_rec markdown_cmds[] = {
     AP_INIT_TAKE12("MarkdownCSS", set_markdown_css, NULL, OR_ALL,
                   "set CSS"),
@@ -257,6 +288,8 @@ static const command_rec markdown_cmds[] = {
                   "set Header HTML"),
     AP_INIT_TAKE1("MarkdownFooterHtml", set_markdown_footer, NULL, OR_ALL,
                   "set Footer HTML"),
+    AP_INIT_TAKE1("MarkdownGAID", set_markdown_ga_id, NULL, OR_ALL,
+                  "set Google Analytics token"),
     {NULL}
 };
 
