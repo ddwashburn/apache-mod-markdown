@@ -75,7 +75,7 @@ void markdown_output(MMIOT *doc, request_rec *r)
 
     conf = (markdown_conf *) ap_get_module_config(r->per_dir_config,
                                                   &markdown_module);
-    ret = mkd_compile(doc, MKD_TOC|MKD_AUTOLINK);
+    ret = mkd_compile(doc, MKD_AUTOLINK);
     ap_rputs("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n", r);
     ap_rputs("<!DOCTYPE html PUBLIC \n"
              "          \"-//W3C//DTD XHTML 1.0 Strict//EN\"\n"
@@ -128,7 +128,7 @@ void markdown_output(MMIOT *doc, request_rec *r)
 
     if (conf->ga_id) {
         ap_rputs("<script type=\"text/javascript\">\n", r);
-        ap_rputs("//<!CDATA[\n", r);
+        //ap_rputs("<!CDATA[\n", r);
         ap_rputs("var _gaq = _gaq || [];\n", r);
         ap_rprintf(r,
                    "_gaq.push(['_setAccount', '%s'])\n",
@@ -143,7 +143,7 @@ void markdown_output(MMIOT *doc, request_rec *r)
         ap_rputs("var s = document.getElementsByTagName('script')[0];"
                  " s.parentNode.insertBefore(ga, s);\n", r);
         ap_rputs("})();\n", r);
-        ap_rputs("//]]>\n", r);
+        //ap_rputs("]]>\n", r);
         ap_rputs("</script>\n", r);
     }
 
@@ -207,7 +207,7 @@ static int markdown_handler(request_rec *r)
         raw_output(fp, r);
         fclose(fp);
     } else {
-        r->content_type = "text/html";
+        r->content_type = "application/xhtml+xml";
         doc = mkd_in(fp, 0);
         fclose(fp);
         if (doc == NULL) {
